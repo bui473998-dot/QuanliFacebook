@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SocialVault – Quản lý tài khoản mạng xã hội</title>
+<style>
+:root{--bg:#f4f5f9;--card:#fff;--tx:#1b1e2b;--mu:#6b7084;--bd:#e3e5ee;--pr:#5b5bf0;--prt:#fff;--dg:#e5484d;--ok:#18a058;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12141c;--card:#1c1f2b;--tx:#eceef6;--mu:#9aa0b8;--bd:#2c3040;--pr:#7c7cff;--prt:#10121a}}
+:root[data-theme="dark"]{--bg:#12141c;--card:#1c1f2b;--tx:#eceef6;--mu:#9aa0b8;--bd:#2c3040;--pr:#7c7cff;--prt:#10121a}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+.hide{display:none!important}
+.btn{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 14px;cursor:pointer}
+.btn:hover{border-color:var(--pr)}
+.btn.pr{background:var(--pr);color:var(--prt);border-color:var(--pr);font-weight:600}
+.btn.dg{color:var(--dg)}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--pr)}
+label{display:block;font-size:13px;color:var(--mu);margin:12px 0 4px}
+#lock{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:28px;width:100%;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.box h1{margin:0 0 4px;font-size:24px}.box p{color:var(--mu);margin:0 0 8px}
+.err{color:var(--dg);font-size:13px;min-height:18px;margin-top:8px}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:14px 16px;border-bottom:1px solid var(--bd);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+header h2{margin:0;font-size:19px;margin-right:auto}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.bar input{flex:1;min-width:200px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.chip{border:1px solid var(--bd);background:var(--card);border-radius:99px;padding:4px 12px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--pr);color:var(--prt);border-color:var(--pr)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.top{display:flex;gap:12px;align-items:center}
+.ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;flex:none}
+.nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub{color:var(--mu);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row{display:flex;gap:6px;align-items:center;background:var(--bg);border-radius:10px;padding:6px 6px 6px 10px;font-size:13px}
+.row span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace}
+.acts{display:flex;gap:6px;flex-wrap:wrap}.acts .pr{flex:1}
+.note{font-size:12px;color:var(--mu)}
+.empty{text-align:center;color:var(--mu);padding:60px 10px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20;overflow:auto}
+.modal .box{max-width:480px;max-height:92vh;overflow:auto}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pw{display:flex;gap:6px}
+.meter{height:5px;border-radius:3px;background:var(--bd);margin-top:6px;overflow:hidden}.meter i{display:block;height:100%;width:0;transition:.2s}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:50;display:flex;gap:10px;align-items:center;max-width:92vw;box-shadow:0 6px 24px rgba(0,0,0,.3)}
+.toast button{background:var(--bg);color:var(--tx);border:0;border-radius:8px;padding:3px 10px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div id="lock">
+  <div class="box">
+    <h1>🔐 SocialVault</h1>
+    <p id="lockMsg"></p>
+    <label>Mật khẩu chủ</label>
+    <input id="mp" type="password" autocomplete="off" placeholder="Nhập mật khẩu chủ">
+    <div id="mp2w" class="hide"><label>Nhập lại mật khẩu chủ</label><input id="mp2" type="password" autocomplete="off"></div>
+    <div class="err" id="lockErr"></div>
+    <button class="btn pr" id="lockBtn" style="width:100%;margin-top:8px"></button>
+    <p class="note" style="margin-top:14px">Dữ liệu được mã hóa AES-256 ngay trên máy bạn. Quên mật khẩu chủ thì không thể khôi phục.</p>
+  </div>
+</div>
+
+<div id="app" class="hide">
+  <header>
+    <h2>🔐 SocialVault</h2>
+    <button class="btn pr" id="addBtn">+ Thêm tài khoản</button>
+    <button class="btn" id="expBtn">Sao lưu</button>
+    <button class="btn" id="impBtn">Nhập</button>
+    <button class="btn" id="autoBtn">⚡ Tự động đăng nhập</button>
+    <button class="btn" id="pwBtn">Đổi MK chủ</button>
+    <button class="btn" id="lockNow">Khóa</button>
+    <input type="file" id="file" accept=".json" class="hide">
+  </header>
+  <div class="wrap">
+    <div class="bar">
+      <input id="q" placeholder="Tìm theo tên, tài khoản, nhãn...">
+      <select id="sort" style="width:auto"><option value="name">Sắp xếp: Tên</option><option value="recent">Dùng gần đây</option><option value="added">Mới thêm</option></select>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="grid" id="grid"></div>
+    <div class="empty hide" id="empty">Chưa có tài khoản nào. Nhấn “+ Thêm tài khoản” để bắt đầu.</div>
+  </div>
+</div>
+
+<div class="modal hide" id="modal">
+  <div class="box">
+    <h1 id="mTitle" style="font-size:20px;margin:0">Thêm tài khoản</h1>
+    <div class="two">
+      <div><label>Nền tảng</label><select id="fPlat"></select></div>
+      <div><label>Tên gợi nhớ</label><input id="fName" placeholder="VD: Fanpage bán hàng"></div>
+    </div>
+    <label>Tên đăng nhập / Email / SĐT</label><input id="fUser" autocomplete="off">
+    <label>Mật khẩu</label>
+    <div class="pw"><input id="fPass" type="text" autocomplete="off"><button class="btn" id="genBtn" type="button" title="Tạo mật khẩu mạnh">🎲</button></div>
+    <div class="meter"><i id="meter"></i></div>
+    <label>Liên kết riêng (tùy chọn, để trống = dùng trang đăng nhập mặc định)</label><input id="fUrl" placeholder="https://...">
+    <div class="two">
+      <div><label>Nhãn (cách nhau bằng dấu phẩy)</label><input id="fTags" placeholder="cá nhân, công việc"></div>
+      <div><label>Mã 2FA / dự phòng</label><input id="fTfa" autocomplete="off"></div>
+    </div>
+    <label>Ghi chú</label><textarea id="fNote" rows="2"></textarea>
+    <div class="err" id="fErr"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn" id="cancel">Hủy</button><button class="btn pr" id="save">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal hide" id="autoModal">
+  <div class="box" style="max-width:600px">
+    <h1 style="font-size:20px;margin:0 0 8px">⚡ Cài đặt tự động đăng nhập</h1>
+    <p style="font-size:14px">Trình duyệt không cho một trang web tự điền vào trang khác, nên cần cài thêm một tiện ích nhỏ trên máy bạn. Chỉ cần làm một lần:</p>
+    <ol style="font-size:14px;padding-left:20px;margin:0 0 10px">
+      <li><b>Khuyên dùng (Chrome/Edge):</b> giải nén file <b>socialvault-extension.zip</b> (bản 2.1, gửi trong khung chat) vào một thư mục cố định. Nếu đã cài bản cũ, ghi đè file rồi bấm biểu tượng tải lại ở thẻ tiện ích và chấp nhận quyền cookie. Mở <b>chrome://extensions</b> (Edge: edge://extensions), bật <b>Chế độ nhà phát triển</b>, bấm <b>Tải tiện ích đã giải nén</b> và chọn thư mục đó.</li>
+      <li>Hoặc dùng Tampermonkey: trong Chi tiết tiện ích bật <b>Allow User Scripts</b>, tạo script mới, bấm <b>Sao chép</b> bên dưới, dán vào và nhấn Ctrl+S.</li>
+      <li>Bật ô bên dưới rồi bấm ⚡ trên tài khoản. Nếu hoạt động, trang đăng nhập sẽ hiện thanh tím "đang tự điền thông tin".</li>
+    </ol>
+    <label style="display:flex;gap:8px;align-items:center;color:var(--tx);font-size:14px"><input type="checkbox" id="autoChk" style="width:auto"> Tự động đăng nhập khi bấm ⚡</label>
+    <label style="display:flex;gap:8px;align-items:center;color:var(--tx);font-size:14px;margin-top:6px"><input type="checkbox" id="swChk" style="width:auto"> Chế độ chuyển tài khoản: đăng xuất tài khoản đang mở của trang đó trước khi đăng nhập (cần tiện ích Chrome bản 2.1)</label>
+    <p class="note" style="margin:6px 0 0">Cùng một hồ sơ Chrome chỉ giữ được một tài khoản mỗi trang tại một thời điểm. Muốn mở nhiều tài khoản cùng lúc, hãy dùng mỗi tài khoản một hồ sơ Chrome riêng (ảnh đại diện góc trên bên phải, Thêm hồ sơ).</p>
+    <label>Mã script</label>
+    <textarea id="usCode" rows="7" readonly style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn pr" id="usDl">Tải script</button><button class="btn" id="usCp">Sao chép</button><button class="btn" id="usClose" style="margin-left:auto">Đóng</button>
+    </div>
+    <p class="note" style="margin-top:12px">Lưu ý bảo mật: khi bật, thông tin đăng nhập được gửi tạm trong phần #fragment của địa chỉ (không gửi lên máy chủ), và script xóa nó ngay khi trang tải. Chỉ dùng trên máy cá nhân. Với Facebook, Instagram, TikTok có thể gặp bước xác minh 2 lớp hoặc captcha, bạn vẫn cần tự xử lý.</p>
+  </div>
+</div>
+
+<script>
+const PLATS={Facebook:['#1877f2','https://www.facebook.com/login'],Instagram:['#d62976','https://www.instagram.com/accounts/login/'],TikTok:['#111','https://www.tiktok.com/login'],'X (Twitter)':['#222','https://x.com/i/flow/login'],YouTube:['#e62117','https://accounts.google.com/ServiceLogin?service=youtube'],LinkedIn:['#0a66c2','https://www.linkedin.com/login'],Zalo:['#0068ff','https://chat.zalo.me/'],Telegram:['#229ed9','https://web.telegram.org/'],Threads:['#333','https://www.threads.net/login'],Pinterest:['#e60023','https://www.pinterest.com/login/'],Reddit:['#ff4500','https://www.reddit.com/login/'],Discord:['#5865f2','https://discord.com/login'],Khác:['#6b7084','']};
+const $=id=>document.getElementById(id), KEY='socialvault_v1';
+let cryptoKey=null, vault={accounts:[]}, salt=null, editId=null, filter='Tất cả', idle=null, mem=null, clipT=null;
+const enc=new TextEncoder(), dec=new TextDecoder();
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function load(){try{return localStorage.getItem(KEY)}catch(e){return mem}}
+function store(v){try{localStorage.setItem(KEY,v)}catch(e){mem=v}}
+async function derive(pw,s){const m=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:s,iterations:250000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function persist(){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},cryptoKey,enc.encode(JSON.stringify(vault)));store(JSON.stringify({s:b64(salt),iv:b64(iv),ct:b64(ct)}))}
+function toast(msg,btn){document.querySelectorAll('.toast').forEach(t=>t.remove());const t=document.createElement('div');t.className='toast';t.append(msg);if(btn){const b=document.createElement('button');b.textContent=btn.t;b.onclick=()=>{btn.f();t.remove()};t.append(b)}document.body.append(t);setTimeout(()=>t.remove(),btn?7000:2200)}
+async function copy(txt,label){try{await navigator.clipboard.writeText(txt);toast('Đã sao chép '+label);clearTimeout(clipT);clipT=setTimeout(()=>navigator.clipboard.writeText(' ').catch(()=>{}),30000)}catch(e){toast('Không thể sao chép tự động, hãy bôi đen và copy thủ công')}}
+
+/* ---------- Khóa / mở khóa ---------- */
+function showLock(){
+  cryptoKey=null;vault={accounts:[]};$('app').classList.add('hide');$('lock').classList.remove('hide');$('mp').value='';$('mp2').value='';$('lockErr').textContent='';
+  const has=!!load();$('mp2w').classList.toggle('hide',has);
+  $('lockMsg').textContent=has?'Nhập mật khẩu chủ để mở két.':'Tạo mật khẩu chủ để bắt đầu (tối thiểu 8 ký tự).';
+  $('lockBtn').textContent=has?'Mở khóa':'Tạo két sắt';$('mp').focus();
+}
+async function unlockOrCreate(){
+  const pw=$('mp').value,raw=load();$('lockErr').textContent='';
+  try{
+    if(!raw){
+      if(pw.length<8)return $('lockErr').textContent='Mật khẩu chủ cần ít nhất 8 ký tự.';
+      if(pw!==$('mp2').value)return $('lockErr').textContent='Hai mật khẩu không khớp.';
+      salt=crypto.getRandomValues(new Uint8Array(16));cryptoKey=await derive(pw,salt);vault={accounts:[]};await persist();
+    }else{
+      const o=JSON.parse(raw);salt=unb64(o.s);const k=await derive(pw,salt);
+      const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},k,unb64(o.ct));
+      vault=JSON.parse(dec.decode(pt));cryptoKey=k;
+    }
+  }catch(e){return $('lockErr').textContent='Sai mật khẩu chủ hoặc dữ liệu bị lỗi.'}
+  $('lock').classList.add('hide');$('app').classList.remove('hide');render();bump();
+}
+function bump(){clearTimeout(idle);idle=setTimeout(()=>{if(cryptoKey){showLock();toast('Đã tự khóa do không hoạt động')}},5*60*1000)}
+['click','keydown','mousemove','touchstart'].forEach(e=>addEventListener(e,()=>cryptoKey&&bump(),{passive:true}));
+
+/* ---------- Hiển thị ---------- */
+function render(){
+  const q=$('q').value.trim().toLowerCase(),sort=$('sort').value;
+  const plats=['Tất cả',...new Set(vault.accounts.map(a=>a.plat))];
+  if(!plats.includes(filter))filter='Tất cả';
+  $('chips').innerHTML=plats.map(p=>`<span class="chip ${p===filter?'on':''}" data-p="${esc(p)}">${esc(p)}${p==='Tất cả'?' ('+vault.accounts.length+')':''}</span>`).join('');
+  let list=vault.accounts.filter(a=>(filter==='Tất cả'||a.plat===filter)&&(!q||[a.name,a.user,a.plat,a.tags,a.note].join(' ').toLowerCase().includes(q)));
+  list.sort((a,b)=>sort==='name'?(a.name||a.plat).localeCompare(b.name||b.plat,'vi'):sort==='recent'?(b.used||0)-(a.used||0):b.created-a.created);
+  $('empty').classList.toggle('hide',list.length>0);
+  $('grid').innerHTML=list.map(a=>{const c=(PLATS[a.plat]||PLATS['Khác'])[0];
+    return `<div class="card" data-id="${a.id}">
+    <div class="top"><div class="ic" style="background:${c}">${esc((a.plat||'?')[0])}</div><div style="min-width:0"><div class="nm">${esc(a.name||a.plat)}</div><div class="sub">${esc(a.plat)}${a.tags?' · '+esc(a.tags):''}</div></div></div>
+    <div class="row"><span>${esc(a.user)}</span><button class="btn sm" data-a="cu">Sao chép</button></div>
+    <div class="row"><span data-pw>••••••••••</span><button class="btn sm" data-a="sh">Hiện</button><button class="btn sm" data-a="cp">Sao chép</button></div>
+    ${a.tfa?`<div class="row"><span>2FA: ${esc(a.tfa)}</span><button class="btn sm" data-a="c2">Sao chép</button></div>`:''}
+    ${a.note?`<div class="note">${esc(a.note)}</div>`:''}
+    <div class="acts"><button class="btn pr sm" data-a="go">⚡ Đăng nhập nhanh</button><button class="btn sm" data-a="ed">Sửa</button><button class="btn sm dg" data-a="del">Xóa</button></div></div>`}).join('');
+}
+$('grid').addEventListener('click',async e=>{
+  const b=e.target.closest('button');if(!b)return;const card=b.closest('.card'),a=vault.accounts.find(x=>x.id===card.dataset.id);if(!a)return;
+  switch(b.dataset.a){
+    case 'cu':copy(a.user,'tên đăng nhập');break;
+    case 'cp':copy(a.pass,'mật khẩu');break;
+    case 'c2':copy(a.tfa,'mã 2FA');break;
+    case 'sh':{const s=card.querySelector('[data-pw]');const show=b.textContent==='Hiện';s.textContent=show?a.pass:'••••••••••';b.textContent=show?'Ẩn':'Hiện';break}
+    case 'ed':openForm(a);break;
+    case 'del':if(confirm('Xóa tài khoản "'+(a.name||a.plat)+'"?')){vault.accounts=vault.accounts.filter(x=>x.id!==a.id);await persist();render();toast('Đã xóa')}break;
+    case 'go':quickLogin(a);break;
+  }
+});
+async function quickLogin(a){
+  const custom=a.url&&(a.plat==='Khác'||/login|signin|accounts/i.test(a.url));
+  const url=custom?a.url:(PLATS[a.plat]||[])[1]||a.url;
+  try{await navigator.clipboard.writeText(a.pass);clearTimeout(clipT);clipT=setTimeout(()=>navigator.clipboard.writeText(' ').catch(()=>{}),30000)}catch(e){}
+  const auto=autoOn()&&url;let go=url;
+  if(auto){const p=btoa(unescape(encodeURIComponent(JSON.stringify({u:a.user,p:a.pass,t:Date.now(),x:switchOn()?1:0}))));go=url.split('#')[0]+'#sv='+encodeURIComponent(p)}
+  if(go){const l=document.createElement('a');l.href=go;l.target='_blank';l.rel='noopener noreferrer';document.body.appendChild(l);l.click();l.remove()}
+  a.used=Date.now();await persist();
+  if(auto)toast('Đang tự động đăng nhập '+(a.name||a.plat)+'... (cần đã cài userscript)',{t:'Chưa cài?',f:()=>$('autoModal').classList.remove('hide')});
+  else toast('Đã sao chép mật khẩu. Tài khoản: '+a.user,{t:'Sao chép TK',f:()=>copy(a.user,'tên đăng nhập')});
+}
+$('chips').onclick=e=>{const c=e.target.closest('.chip');if(c){filter=c.dataset.p;render()}};
+$('q').oninput=render;$('sort').onchange=render;
+
+/* ---------- Form thêm / sửa ---------- */
+$('fPlat').innerHTML=Object.keys(PLATS).map(p=>`<option>${p}</option>`).join('');
+$('fPlat').onchange=()=>{};
+function strength(p){let s=0;if(p.length>=8)s++;if(p.length>=12)s++;if(/[a-z]/.test(p)&&/[A-Z]/.test(p))s++;if(/\d/.test(p))s++;if(/[^\w]/.test(p))s++;return s}
+$('fPass').oninput=()=>{const s=strength($('fPass').value),m=$('meter');m.style.width=s*20+'%';m.style.background=s<3?'var(--dg)':s<5?'#e8a700':'var(--ok)'};
+function genPass(n=18){const set='abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%^&*-_?';const r=crypto.getRandomValues(new Uint32Array(n));return Array.from(r,x=>set[x%set.length]).join('')}
+$('genBtn').onclick=()=>{$('fPass').value=genPass();$('fPass').oninput()};
+function openForm(a){
+  editId=a?a.id:null;$('mTitle').textContent=a?'Sửa tài khoản':'Thêm tài khoản';$('fErr').textContent='';
+  $('fPlat').value=a?a.plat:'Facebook';$('fName').value=a?.name||'';$('fUser').value=a?.user||'';$('fPass').value=a?.pass||'';
+  $('fUrl').value=a?a.url:'';$('fTags').value=a?.tags||'';$('fTfa').value=a?.tfa||'';$('fNote').value=a?.note||'';
+  $('fPass').oninput();$('modal').classList.remove('hide');$('fUser').focus();
+}
+$('addBtn').onclick=()=>openForm(null);$('cancel').onclick=()=>$('modal').classList.add('hide');
+$('save').onclick=async()=>{
+  const d={plat:$('fPlat').value,name:$('fName').value.trim(),user:$('fUser').value.trim(),pass:$('fPass').value,url:$('fUrl').value.trim(),tags:$('fTags').value.trim(),tfa:$('fTfa').value.trim(),note:$('fNote').value.trim()};
+  if(!d.user||!d.pass)return $('fErr').textContent='Vui lòng nhập tên đăng nhập và mật khẩu.';
+  if(d.url&&!/^https?:\/\//i.test(d.url))return $('fErr').textContent='Liên kết phải bắt đầu bằng http:// hoặc https://';
+  if(editId)Object.assign(vault.accounts.find(x=>x.id===editId),d);
+  else vault.accounts.push({id:crypto.randomUUID(),created:Date.now(),used:0,...d});
+  await persist();$('modal').classList.add('hide');render();toast('Đã lưu');
+};
+
+/* ---------- Sao lưu / nhập / đổi mật khẩu ---------- */
+$('expBtn').onclick=()=>{const raw=load();if(!raw)return;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([raw],{type:'application/json'}));a.download='socialvault-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();copy(raw,'bản sao lưu (đã mã hóa), hãy dán vào Notepad và lưu lại')};
+$('impBtn').onclick=()=>$('file').click();
+$('file').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  const pw=prompt('Nhập mật khẩu chủ của file sao lưu:');if(!pw)return;
+  try{const o=JSON.parse(await f.text());const k=await derive(pw,unb64(o.s));
+    const v=JSON.parse(dec.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},k,unb64(o.ct))));
+    let n=0;v.accounts.forEach(a=>{if(!vault.accounts.some(x=>x.id===a.id)){vault.accounts.push(a);n++}});
+    await persist();render();toast('Đã nhập '+n+' tài khoản mới');
+  }catch(err){toast('Không thể nhập: sai mật khẩu hoặc file lỗi')}
+};
+$('pwBtn').onclick=async()=>{
+  const p=prompt('Nhập mật khẩu chủ mới (tối thiểu 8 ký tự):');if(!p)return;if(p.length<8)return toast('Mật khẩu quá ngắn');
+  if(prompt('Nhập lại mật khẩu chủ mới:')!==p)return toast('Hai mật khẩu không khớp');
+  salt=crypto.getRandomValues(new Uint8Array(16));cryptoKey=await derive(p,salt);await persist();toast('Đã đổi mật khẩu chủ');
+};
+$('lockNow').onclick=showLock;
+function autoOn(){try{return localStorage.getItem('sv_auto')!=='0'}catch(e){return true}}
+const US=String.raw`// ==UserScript==
+// @name         SocialVault AutoLogin
+// @namespace    socialvault
+// @version      2.1
+// @description  Tự điền đăng nhập từ SocialVault
+// @match        https://*.facebook.com/*
+// @match        https://*.instagram.com/*
+// @match        https://*.tiktok.com/*
+// @match        https://x.com/*
+// @match        https://twitter.com/*
+// @match        https://accounts.google.com/*
+// @match        https://*.linkedin.com/*
+// @match        https://web.telegram.org/*
+// @match        https://*.threads.net/*
+// @match        https://*.threads.com/*
+// @match        https://*.pinterest.com/*
+// @match        https://*.reddit.com/*
+// @match        https://discord.com/*
+// @match        https://id.zalo.me/*
+// @match        https://chat.zalo.me/*
+// @run-at       document-start
+// @grant        none
+// ==/UserScript==
+(function () {
+  if (window.top !== window.self) return;
+  var c = null, m = location.hash.match(/[#&]sv=([^&]+)/);
+  var clean = function () {
+    if (/[#&]sv=/.test(location.hash)) {
+      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    }
+  };
+  if (m) {
+    try { c = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1]))))); } catch (e) { return; }
+    try { sessionStorage.setItem('__sv', JSON.stringify(c)); } catch (e) {}
+    clean();
+  } else {
+    try { c = JSON.parse(sessionStorage.getItem('__sv') || 'null'); } catch (e) {}
+  }
+  if (!c || !c.u || Date.now() - c.t > 120000) {
+    try { sessionStorage.removeItem('__sv'); } catch (e) {}
+    return;
+  }
+
+  var note = function (t, err) {
+    var d = document.getElementById('__svb');
+    if (!d) {
+      d = document.createElement('div');
+      d.id = '__svb';
+      d.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:2147483647;color:#fff;padding:8px 14px;border-radius:10px;font:14px system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.3)';
+      (document.body || document.documentElement).appendChild(d);
+    }
+    d.style.background = err ? '#e5484d' : '#5b5bf0';
+    d.textContent = t;
+  };
+  var hideNote = function (ms) {
+    setTimeout(function () { var b = document.getElementById('__svb'); if (b) b.remove(); }, ms);
+  };
+  var vis = function (e) {
+    if (!e || e.disabled) return false;
+    if (!e.getClientRects().length) return false;
+    var s = getComputedStyle(e);
+    return s.visibility !== 'hidden' && s.display !== 'none';
+  };
+  var setVal = function (el, v) {
+    var d = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    el.focus();
+    d.set.call(el, v);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+  var findPw = function () {
+    var l = document.querySelectorAll('input[type=password]');
+    for (var i = 0; i < l.length; i++) if (vis(l[i])) return l[i];
+    return null;
+  };
+  var findUser = function (pw) {
+    var all = document.querySelectorAll('input'), list = [], i;
+    for (i = 0; i < all.length; i++) {
+      var e = all[i], t = (e.type || 'text').toLowerCase();
+      if (['text', 'email', 'tel'].indexOf(t) < 0 || e.readOnly || !vis(e)) continue;
+      if (/search|tìm kiếm/i.test((e.name || '') + ' ' + (e.getAttribute('aria-label') || '') + ' ' + (e.placeholder || ''))) continue;
+      list.push(e);
+    }
+    if (pw) {
+      var best = null;
+      for (i = 0; i < list.length; i++) if (list[i].compareDocumentPosition(pw) & 4) best = list[i];
+      return best;
+    }
+    return list[0] || null;
+  };
+  var submit = function (el) {
+    var node = el, btn = null, i, j;
+    for (i = 0; i < 8 && node && !btn; i++) {
+      node = node.parentElement;
+      if (!node) break;
+      var bs = node.querySelectorAll('button,[role=button],input[type=submit],input[type=button]');
+      for (j = 0; j < bs.length; j++) {
+        var b = bs[j];
+        var t = ((b.innerText || b.value || '') + ' ' + (b.getAttribute('aria-label') || '')).trim();
+        if (!vis(b) || b.getAttribute('aria-disabled') === 'true') continue;
+        if (/quên|forgot|tạo|create|đăng ký|sign ?up|đăng nhập bằng|continue with|tiếp tục với|hiện|ẩn|show|hide/i.test(t)) continue;
+        if (b.type === 'submit' || b.name === 'login' || /đăng nhập|log ?in|sign ?in|next|continue|tiếp|submit/i.test(t)) { btn = b; break; }
+      }
+    }
+    if (btn) { btn.click(); return true; }
+    var f = el.form || el.closest('form');
+    if (f) { try { f.requestSubmit(); return true; } catch (e) {} }
+    ['keydown', 'keypress', 'keyup'].forEach(function (n) {
+      el.dispatchEvent(new KeyboardEvent(n, { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true }));
+    });
+    return false;
+  };
+  var openOther = function () {
+    var els = document.querySelectorAll('div[role=button],a,button,span');
+    for (var k = 0; k < els.length; k++) {
+      var tx = els[k].textContent || '';
+      if (tx.length < 60 && /dùng trang cá nhân khác|use another profile|log into another account|đăng nhập vào tài khoản khác|đăng nhập bằng tài khoản khác/i.test(tx) && vis(els[k])) {
+        els[k].click();
+        return true;
+      }
+    }
+    return false;
+  };
+
+  var start = function () {
+  var st = { u: 0, p: 0, o: 0, n: 0 }, tries = 0, lastN = 0;
+  var timer = setInterval(function () {
+    clean();
+    if (++tries > 90) {
+      clearInterval(timer);
+      note('SocialVault: không tìm thấy ô đăng nhập. Mật khẩu đã được sao chép, hãy dán thủ công.', true);
+      return;
+    }
+    if (tries === 1) note('SocialVault: đang tự điền thông tin...');
+    var pw = findPw(), us = findUser(pw);
+    if (!pw && !us && !st.o) { st.o = openOther() ? 1 : 0; return; }
+    if (us && !st.u) { setVal(us, c.u); st.u = 1; }
+    if (pw && !st.p) {
+      st.p = 1;
+      clearInterval(timer);
+      setVal(pw, c.p);
+      setTimeout(function () {
+        try { sessionStorage.removeItem('__sv'); } catch (e) {}
+        if (submit(pw)) note('SocialVault: đã điền xong, đang đăng nhập...');
+        else note('SocialVault: đã điền xong. Nếu chưa vào được, hãy bấm nút Đăng nhập.');
+        hideNote(5000);
+      }, 600);
+    } else if (us && st.u && !pw && st.n < 3 && Date.now() - lastN > 3000) {
+      st.n++;
+      lastN = Date.now();
+      submit(us);
+    }
+  }, 400);
+  };
+  if (c.x && !c.cx && typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+    c.cx = 1;
+    try { sessionStorage.setItem('__sv', JSON.stringify(c)); } catch (e) {}
+    note('SocialVault: đang đăng xuất tài khoản cũ để chuyển tài khoản...');
+    var done = false;
+    var go = function () { if (done) return; done = true; location.reload(); };
+    try { chrome.runtime.sendMessage({ type: 'sv-clear', domain: location.hostname.split('.').slice(-2).join('.') }, go); } catch (e) { go(); }
+    setTimeout(go, 4000);
+  } else start();
+})();
+`;
+$('usCode').value=US;
+function switchOn(){try{return localStorage.getItem('sv_switch')!=='0'}catch(e){return true}}
+$('autoChk').checked=autoOn();
+$('swChk').checked=switchOn();
+$('swChk').onchange=e=>{try{localStorage.setItem('sv_switch',e.target.checked?'1':'0')}catch(err){}};
+$('autoChk').onchange=e=>{try{localStorage.setItem('sv_auto',e.target.checked?'1':'0')}catch(err){}};
+$('autoBtn').onclick=()=>$('autoModal').classList.remove('hide');
+$('usClose').onclick=()=>$('autoModal').classList.add('hide');
+$('usCp').onclick=()=>copy(US,'script');
+$('usDl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([US],{type:'text/javascript'}));a.download='socialvault-autologin.user.js';a.click()};
+$('lockBtn').onclick=unlockOrCreate;
+['mp','mp2'].forEach(i=>$(i).addEventListener('keydown',e=>e.key==='Enter'&&unlockOrCreate()));
+addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').classList.add('hide');$('autoModal').classList.add('hide')}});
+showLock();
+</script>
+</body>
+</html>
